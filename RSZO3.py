@@ -14,7 +14,6 @@ class Databullet():
     l: float
     d: float
     KSA_n: float
-    KSA_s: float
     boost: float
     boost_t: float
     max_angle: float
@@ -33,7 +32,7 @@ pygame.display.set_caption("Grafics")
 WIDHT = pygame.display.Info().current_w * 0.8 // 100 * 100
 HIGHT = pygame.display.Info().current_h * 0.8 // 100 * 100
 
-tick = 250    # Кол-во тиков в секунду
+tick = 10    # Кол-во тиков в секунду
 
 t = 1 / tick
 
@@ -83,14 +82,12 @@ for i in range(len(file) // 4 ):
 
 logs = open('logs.txt', 'w')
 
-
-
 # Задаю все глобальные переменные
 
 
 class Missle:
 
-    def __init__(self, angle, speed, m, m_topl, color, l, d, KSA_n, KSA_s, boost, boost_t, hight):
+    def __init__(self, angle, speed, m, m_topl, color, l, d, KSA_n, boost, boost_t, hight):
         self.positions = []
         self.run = 1
 
@@ -99,7 +96,6 @@ class Missle:
         self.m_topl = m_topl # Масса топлива, которая постепенно будет уменьшаться
 
         self.KSA_n = KSA_n  # коофицент сопротивления воздуха объекта в профиль
-        self.KSA_s = KSA_s  # коофицент сопротивления воздуха объекта сбоку
         self.KSA_x = None  # КСВ по x
         self.KSA_y = None  # КСВ по y
         self.d = d    # Диаметр снаряда
@@ -318,6 +314,38 @@ button_pause = Button((WIDHT - 80, 0, WIDHT, 80), 'PAUSE')
 # button_selector = Button((WIDHT - 200, 81, WIDHT, 160), 'SELECT AMMO')
 
 ## INPUT_ZONE
+print('Хотите ли вы создать новый тип снаряда? (yes or no)', end='\n')
+pres = input()
+if pres == 'no':
+    pass
+elif pres == 'yes':
+    print('Введите название снаряда')
+    name = input()
+    print('Введите начальную скорость снаряда в м\с')
+    speed = float(input())
+    print('Введите начальную массу снаряда в кг')
+    m = float(input())
+    print('Введите начальную массу топлива в кг')
+    m_topl = float(input())
+    print('Введите длинну снаряда в м')
+    l = float(input())
+    print('Введите диаметр снаряда в м')
+    d = float(input())
+    print('Введите коофицент сопротивления в среде снаряда в лобовой проекции')
+    KSA_n = float(input())
+    print('Введите мощность двигателя в дж')
+    boost = float(input())
+    print('Введите время работы двигателя в с, если нет, то -1')
+    boost_t = float(input())
+    open('databullets.txt', 'a', encoding='utf8').write(f"{name.replace(' ', '_')} {speed} {m} {m_topl} {l} {d} {KSA_n} {boost} {boost_t}\n")
+    print('Ваш снаряд успешно сохранён')
+
+# РСЗО_ГРАД 50 121 60 2.870 0.122 0.15 28000 2
+# Артилерия_1812_года 290 5.5 0 1.2 1.2 0.47 0 -1
+
+else:
+    raise Exception('тебе ясно сказали yes or no')
+
 print('Введите максимальный угол залпа в градусах: ')
 max_angle = float(input())
 print('Введите минимальный угол залпа в градусах: ')
@@ -327,59 +355,20 @@ ZALP = int(input())
 print('Введите высоту с которой происходит залп')
 hight = float(input())
 
-# РСЗО ГРАД
-# speed = 50
-# m = 121
-# m_topl = 60
-# l = 2.870
-# d = 0.122
-# KSA_n = 0.15
-# KSA_s = 0.7
-# boost = 28_000.000
-# boost_t = 2
-# max_angle = 75.0001
-# min_angle = 40.000001
-# ZALP = 100
-# rasev = 555
-# hight = 2
 
-grad = Databullet('РСЗО ГРАД', 50, 121, 60, 2.870, 0.122, 0.15, 0.7, 28000, 2, max_angle, min_angle, ZALP, hight)
+databullets = {}
+for data in list(open('databullets.txt', 'r', encoding='utf8').read().split('\n')):
+    data = data.split()
+    if len(data) < 9:
+        continue
+    databullets.update({data[0].replace('_', ' ') : Databullet(data[0].replace('_', ' '), float(data[1]), float(data[2]), float(data[3]), float(data[4]), float(data[5]), float(data[6]), float(data[7]), float(data[8]), max_angle, min_angle, ZALP, hight)})
 
-# # Парашутист
-# speed = 10
-# m = 120
-# m_topl = 0
-# l = 1.8
-# d = 0.5
-# KSA_n = 0.9
-# KSA_s = 0.9
-# boost = 0.00001
-# boost_t = 0.00001
-# max_angle = 0.0001
-# min_angle = 0
-# ZALP = 3
-# rasev = 1
-# hight = 5000
+keys = list(databullets.keys())
+print('Введите название снаряда, которым хотите воспользоваться. Существующие классы:')
+for cl in keys:
+    print(cl)
 
-parashut = Databullet('Парашутист', 75, 85, 0, 1.850, 0.75, 1.2, 1.7, 0, -1, max_angle, min_angle, ZALP, hight)
-
-# Пушечная артилерия 1812
-# speed = 290
-# m = 5.5
-# m_topl = 0
-# l = 0.120
-# d = 0.120
-# KSA_n = 0.47
-# KSA_s = 0.47
-# boost = 0
-# boost_t = -1
-# max_angle = 15.0001
-# min_angle = 15
-# ZALP = 200
-# rasev = 125
-# hight = 1
-
-
+boepripas = databullets.get(input())
 # # Т-80 БОПС
 # speed = 1780
 # m = 3.9
@@ -395,6 +384,7 @@ parashut = Databullet('Парашутист', 75, 85, 0, 1.850, 0.75, 1.2, 1.7, 
 # ZALP = 50
 # rasev = 0
 # hight = 2.5
+
 
 # #авиабимба ФАБ-5000
 # speed = 320
@@ -412,7 +402,7 @@ parashut = Databullet('Парашутист', 75, 85, 0, 1.850, 0.75, 1.2, 1.7, 
 # rasev = 125
 # hight = 4000
 
-fab5k = Databullet('ФАБ 5000', 320, 5400, 0, 5.2, 1.0, 0.4, 0.7, 0, -1, max_angle, min_angle, ZALP, hight)
+# fab5k = Databullet('ФАБ 5000', 320, 5400, 0, 5.2, 1.0, 0.4, 0.7, 0, -1, max_angle, min_angle, ZALP, hight)
 
 # #авиабимба ФАБ-250
 # speed = 700 / 3.6
@@ -433,6 +423,8 @@ fab5k = Databullet('ФАБ 5000', 320, 5400, 0, 5.2, 1.0, 0.4, 0.7, 0, -1, max_a
 # missle1 = Missle(radians(55), speed, m, m_topl, RED, l, d, KSA_n, KSA_s, boost, boost_t)
 # Missels.append(missle1)
 
+
+grad = Databullet('РСЗО_ГРАД', 50, 121, 60, 2.870, 0.122, 0.15, 28000, 2, max_angle, min_angle, ZALP, hight)
 
 screen.fill(OLD_COLOR)
 
@@ -458,7 +450,7 @@ OPTIMAL_ANGLE = 45
 Missels =[]
 
 for i in range(ZALP):
-    Missels.append(Missle(radians((max_angle - min_angle) / ZALP * i + min_angle), parashut.speed, parashut.m, parashut.m_topl, COLOR_BASE[i % len(COLOR_BASE)], parashut.l, parashut.d, parashut.KSA_n, parashut.KSA_s, parashut.boost, parashut.boost_t, hight))
+    Missels.append(Missle(radians((max_angle - min_angle) / ZALP * i + min_angle), boepripas.speed, boepripas.m, boepripas.m_topl, COLOR_BASE[i % len(COLOR_BASE)], boepripas.l, boepripas.d, boepripas.KSA_n, boepripas.boost, boepripas.boost_t, hight))
 
 while 1:
     for event in pygame.event.get():
